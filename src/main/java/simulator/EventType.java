@@ -1,4 +1,7 @@
 package main.java.simulator;
 
-public class EventType {
+public enum EventType {
+    SOURCE_ON,
+    SOURCE_OFF,
+    TICK
 }
