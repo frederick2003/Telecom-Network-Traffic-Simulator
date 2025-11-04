@@ -82,14 +82,21 @@ public class SimulationManager {
         TrafficSource s = (e.getSourceId() >= 0 && e.getSourceId() < sources.size()) ? sources.get(e.getSourceId()) : null;
         if (s == null) return;
 
+        // Switch on event type
         switch (e.getType()) {
+            // If event type is ON
             case SOURCE_ON -> {
+                // If the TrafficSource.isOn = false;
+                // Turn the source on and add its rate to the accumulated rate.
                 if (!s.getIsOn()) {
                     schedule(s.scheduleNextEvent(now)); // toggles to ON inside
                     aggregateRate += s.getOnRate();
                 }
             }
+            // If event type is OFF
             case SOURCE_OFF -> {
+                // If the TrafficSource.isOn = true
+                // Turn off the source and remove its rate from the accumulated rate.
                 if (s.getIsOn()) {
                     schedule(s.scheduleNextEvent(now)); // toggles to OFF inside
                     aggregateRate -= s.getOnRate();
