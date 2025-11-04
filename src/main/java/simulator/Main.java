@@ -1,7 +1,5 @@
 package main.java.simulator;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main {
     public static void main(String[] args) {
         SimulationManager simulator = new SimulationManager();
@@ -20,6 +18,5 @@ public class Main {
         simulator.run(simulatorConfig.totalTime);
         System.out.println("Points recorded: " + simulator.getRecorder().asPoints().size());
         System.out.println("Done at t=" + simulator.getNow());
-
     }
 }

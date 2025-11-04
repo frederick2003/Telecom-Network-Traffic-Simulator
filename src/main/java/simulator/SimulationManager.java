@@ -38,7 +38,7 @@ public class SimulationManager {
      * Schedules the first event for every traffic source at the start of the simulation.
      *
      * For each TrafficSource in sources, it calls that source's scheduleInitialEvent method(now) method.
-     * Each source decides randomly whether it is on or off and schedules the appropriate first event.
+     * Each source starts in an OFF state, the scheduleInitialEvent(now) method samples a random time from a pareto distribution.
      * Each event is then added to the event queue via the schedule method.
      */
     public void seedInitialEvents() {
