@@ -55,11 +55,11 @@ public class SimulationManager {
      */
     public void run(double untilTime) {
 
-        seedInitialEvents(); // Puts each sources first event into the event queue.
+        seedInitialEvents(); // Puts each sources' first event into the event queue.
         recorder.record(0.0, aggregateRate);
 
         while (!eventQ.isEmpty()) {
-            Event e = eventQ.poll(); // Grabs first event in the event queue.
+            Event e = eventQ.poll(); // Grabs event in the front of the event queue.
             if (e.getTime() > untilTime) break;
 
             // Integrate piecewise-constant segment
@@ -68,10 +68,13 @@ public class SimulationManager {
 
             // Updates source state.
             handle(e);
+
+            recorder.recordEventLog(e.getSourceId(),e.getType(), e.getTime(), aggregateRate);
         }
 
         // Closes off the final time segment.
         recorder.finish(untilTime);
+        recorder.recordSummarysStats(double untilTime, double );
     }
 
     /**
@@ -91,6 +94,7 @@ public class SimulationManager {
                 if (!s.getIsOn()) {
                     schedule(s.scheduleNextEvent(now)); // toggles to ON inside
                     aggregateRate += s.getOnRate();
+
                 }
             }
             // If event type is OFF
@@ -104,6 +108,9 @@ public class SimulationManager {
             }
             case TICK -> {
                 // Optional: for periodic reporting
+            }
+            default -> {
+                System.out.print("Default triggered");
             }
         }
     }
