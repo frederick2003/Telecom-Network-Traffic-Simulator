@@ -23,20 +23,14 @@ public class Main {
 
         }
 
-        // Run the simulator and output the sim data.
-        simulator.run(simulatorConfig.totalTime);
-        System.out.println("Points recorded: " + simulator.getRecorder().asPoints().size());
-        System.out.println("Done at t=" + simulator.getNow());
 
-        /*
-        Outputs time-series Data
+        // Run simulator
+        simulator.run(simulatorConfig.totalTime);
+
+        // Outputs time-series Data
         simulator.getRecorder().outputTimeSeriesData();
 
-        Outputs Historical event logs
+        // Outputs Historical event logs
         simulator.getRecorder().printEventsLog();
-
-        Outputs simulation state every 10
-        */
-
     }
 }

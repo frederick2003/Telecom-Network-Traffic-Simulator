@@ -44,8 +44,13 @@ public class TrafficSource {
      * @return a new Event object with an ON or OFF duration created by sampling the pareto distribution.
      */
     public Event scheduleNextEvent(double now) {
-        isOn = !isOn; // Toggle state and schedule opposite
-        double dt = isOn ? sampleOnDuration() : sampleOffDuration(); // Samples a random ON or OFF duration based on the sources current state.
+        // 1. Toggle state.
+        isOn = !isOn;
+
+        // 2. Sample new event duration.
+        double dt = isOn ? sampleOnDuration() : sampleOffDuration();
+
+        // Returns a new event.
         return new Event(now + dt,  id, isOn ? EventType.SOURCE_OFF : EventType.SOURCE_ON);
     }
 

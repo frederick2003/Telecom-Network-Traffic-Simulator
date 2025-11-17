@@ -4,9 +4,6 @@ import java.util.PriorityQueue;
 import java.util.List;
 import java.util.ArrayList;
 
-import static main.java.simulator.EventType.SOURCE_ON;
-import static main.java.simulator.EventType.TICK;
-
 /**
  * The central controller of the event driven telecom traffic simulator.
  */
@@ -14,6 +11,7 @@ public class SimulationManager {
     private final PriorityQueue<Event> eventQ = new PriorityQueue<>();
     private final List<TrafficSource> sources = new ArrayList<>();
     private final TimeSeriesRecorder recorder = new TimeSeriesRecorder();
+    private final StatisticsManager statsManager = new StatisticsManager();
     private double now = 0.0;
     private double aggregateRate = 0.0;
 
@@ -48,6 +46,46 @@ public class SimulationManager {
     }
 
     /**
+     * Manages event execution, namely toggles ON, OFF sources and adjusts aggregateRate.
+     * @param e current event object.
+     */
+    private void handle(Event e) {
+        TrafficSource s = (e.getSourceId() >= 0 && e.getSourceId() < sources.size()) ? sources.get(e.getSourceId()) : null;
+        if (s == null) return;
+
+        // Switch on event type
+        switch (e.getType()) {
+            case SOURCE_ON -> {
+                if (!s.getIsOn()) {
+                    // Schedules an on duration & Toggles TrafficSource state of On.
+                    schedule(s.scheduleNextEvent(now));
+
+                    // Adds the source rate to the aggregate rate.
+                    aggregateRate += s.getOnRate();
+
+                }
+            }
+            case SOURCE_OFF -> {
+                if (s.getIsOn()) {
+                    // Schedules an off duration & Toggles TrafficSource state of off.
+
+                    // 3. New event scheduled.
+                    schedule(s.scheduleNextEvent(now));
+
+                    // Removes the source rate from the aggregate rate.
+                    aggregateRate -= s.getOnRate();
+                }
+            }
+            case TICK -> {
+                // Optional: for periodic reporting
+            }
+            default -> {
+                System.out.print("Default triggered");
+            }
+        }
+    }
+
+    /**
      * Runs main simulation loop, processes events until user defined total time is reached.
      * Core method that progresses the simulation.
      *
@@ -59,7 +97,7 @@ public class SimulationManager {
         recorder.record(0.0, aggregateRate);
 
         while (!eventQ.isEmpty()) {
-            Event e = eventQ.poll(); // Grabs event in the front of the event queue.
+            Event e = eventQ.poll(); // Grabs and removes event in the front of the event queue.
             if (e.getTime() > untilTime) break;
 
             // Integrate piecewise-constant segment
@@ -69,50 +107,12 @@ public class SimulationManager {
             // Updates source state.
             handle(e);
 
+            statsManager.updateSimulationStatistics(e, sources.get(e.getSourceId()));
             recorder.recordEventLog(e.getSourceId(),e.getType(), e.getTime(), aggregateRate);
         }
 
         // Closes off the final time segment.
         recorder.finish(untilTime);
-        recorder.recordSummarysStats(double untilTime, double );
-    }
-
-    /**
-     * Manages event execution, namely toggles ON, OFF sources and adjusts aggregateRate.
-     * @param e current event object.
-     */
-    private void handle(Event e) {
-        TrafficSource s = (e.getSourceId() >= 0 && e.getSourceId() < sources.size()) ? sources.get(e.getSourceId()) : null;
-        if (s == null) return;
-
-        // Switch on event type
-        switch (e.getType()) {
-            // If event type is ON
-            case SOURCE_ON -> {
-                // If the TrafficSource.isOn = false;
-                // Turn the source on and add its rate to the accumulated rate.
-                if (!s.getIsOn()) {
-                    schedule(s.scheduleNextEvent(now)); // toggles to ON inside
-                    aggregateRate += s.getOnRate();
-
-                }
-            }
-            // If event type is OFF
-            case SOURCE_OFF -> {
-                // If the TrafficSource.isOn = true
-                // Turn off the source and remove its rate from the accumulated rate.
-                if (s.getIsOn()) {
-                    schedule(s.scheduleNextEvent(now)); // toggles to OFF inside
-                    aggregateRate -= s.getOnRate();
-                }
-            }
-            case TICK -> {
-                // Optional: for periodic reporting
-            }
-            default -> {
-                System.out.print("Default triggered");
-            }
-        }
     }
 
     // Getter methods.
