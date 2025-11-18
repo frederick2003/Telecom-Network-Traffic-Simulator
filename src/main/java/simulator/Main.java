@@ -28,9 +28,9 @@ public class Main {
         simulator.run(simulatorConfig.totalTime);
 
         // Outputs time-series Data
-        simulator.getRecorder().outputTimeSeriesData();
+        simulator.getRecorder().logTimeSeriesDataToCsv("data/time-series-data.csv");
 
         // Outputs Historical event logs
-        simulator.getRecorder().printEventsLog();
+        simulator.getRecorder().logEventsToCsv("data/events-log.csv");
     }
 }

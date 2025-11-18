@@ -1,6 +1,8 @@
 package main.java.simulator;
 
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -49,22 +51,30 @@ public class TimeSeriesRecorder {
 
     }
 
-    public void recordSummarysStats(){
-        
-    }
-    
-    public void printEventsLog(){
-        System.out.println("sourceId" + "," + "eventType" + "," + "eventTime" + "," + "currentAggregateRate");
-        for (String event: eventsLog){
-            System.out.println(event);
+    public void logEventsToCsv(String filePath){
+        try(PrintWriter writer = new PrintWriter(new FileWriter(filePath, false))){
+            writer.println("sourceId" + "," + "eventType" + "," + "eventTime" + "," + "currentAggregateRate");
+            for (String event: eventsLog){
+                writer.println(event);
+            }
+        }catch (IOException e){
+            e.printStackTrace();
         }
+
+        System.out.println("Logged simulation event data to " + filePath);
     }
 
-    public void outputTimeSeriesData(){
-        System.out.println("time,totalAggregateRate");
-        for (double[] p : points) {
-            System.out.println("Time: " + p[0] + ", aggregateRate: " + p[1]);
+    public void logTimeSeriesDataToCsv(String filePath){
+        try(PrintWriter writer = new PrintWriter(new FileWriter(filePath, false))){
+            writer.println("time,totalAggregateRate");
+            for (double[] p : points) {
+                writer.println(p[0] + "," + p[1]);
+            }
+        }catch(IOException e){
+            e.printStackTrace();
         }
+
+        System.out.println("Logged time-series data to " + filePath);
     }
 
     public void toCsv(Path path) throws IOException {

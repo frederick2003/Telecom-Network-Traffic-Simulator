@@ -107,10 +107,12 @@ public class SimulationManager {
             // Updates source state.
             handle(e);
 
-            statsManager.updateSimulationStatistics(e, sources.get(e.getSourceId()));
+            statsManager.updateSimulationStatistics(e, sources.get(e.getSourceId()), aggregateRate);
             recorder.recordEventLog(e.getSourceId(),e.getType(), e.getTime(), aggregateRate);
         }
 
+        statsManager.finaliseStatistics(untilTime);
+        statsManager.logSummaryStatsToCsv("data/summary-stats.csv");
         // Closes off the final time segment.
         recorder.finish(untilTime);
     }
