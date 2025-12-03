@@ -13,6 +13,7 @@ import java.util.Scanner;
 public class InputHandler {
     /** Scanner instance for reading console input. */
     private final Scanner scanner = new Scanner(System.in);
+    private double hurst = 0.8;
 
     /**
      * Prompts the user for all required simulator parameters, validates the input,
@@ -22,6 +23,55 @@ public class InputHandler {
      */
     public SimulatorConfig getSimulatorConfiguration() {
         logWelcome();
+        while(true) {
+            String parameterConfigChoice = getSimulatorConfigChoice();
+            checkQuit(parameterConfigChoice);
+
+            switch (parameterConfigChoice) {
+                case "manual":
+                    System.out.println("Manual Parameter Input chosen");
+                    return getManualSimulationConfig();
+                case "load":
+                    System.out.println("Load Parameter chosen");
+                    SimulatorConfig loadedConfig = loadConfigFromFile();
+                    if (loadedConfig != null){
+                        return loadedConfig;
+                    }
+                    System.out.println("File cannot be loaded");
+                    System.out.println("Check file is in the correct directory");
+                    System.out.println("File must be a .txt file in the following format:");
+                    System.out.println("totalTime=1000\n" +
+                            "numSources=20\n" +
+                            "alphaOn=1.5\n" +
+                            "xmOn=1\n" +
+                            "alphaOff=1.4\n" +
+                            "xmOff=1");
+                default:
+                    System.out.println("Invalid option. Please type 'manual', 'load', or 'quit'.");
+            }
+        }
+    }
+
+    private SimulatorConfig getManualSimulationConfig(){
+
+        int choice = getPositiveInt("\nChoose Traffic Model:\n" +
+                "1 = Pareto (recommended)\n" +
+                "2 = Fractional Gaussian Noise\n" +
+                ":");
+
+        TrafficModelType modelType = switch (choice){
+            case 1 -> TrafficModelType.PARETO;
+            case 2 -> TrafficModelType.FRACTIONAL_GAUSSIAN_NOISE;
+            default -> TrafficModelType.PARETO;
+        };
+
+        if (modelType == TrafficModelType.FRACTIONAL_GAUSSIAN_NOISE){
+            hurst = getPositiveDouble("Enter Hurst parameter H (0.5 < H < 1.0, typical: 0.7–0.95):");
+        }
+        if (hurst<=0.5 || hurst >=0.95){
+            System.out.println("Invalid H. Setting default H = 0.8");
+            hurst = 0.8;
+        }
 
         double simulatorTime = getPositiveDouble(
                 "Enter Simulator Total Run Time (e.g. 1000): "
@@ -54,7 +104,9 @@ public class InputHandler {
                 simulatorParetoAlphaOff,
                 simulatorParetoXmOn,
                 simulatorParetoXmOff,
-                1.0
+                1.0,
+                modelType,
+                hurst
         );
     }
 
@@ -117,6 +169,24 @@ public class InputHandler {
     }
 
     /**
+     *
+     * @return
+     */
+    public SimulatorConfig loadConfigFromFile(){
+        System.out.print("Enter configuration file name: ");
+        String filepath = scanner.next();
+
+        try {
+            SimulatorConfig config = SimulatorConfigLoader.loadFromFile(filepath);
+            System.out.println("Configuration loaded successfully from " + filepath);
+            return config;
+        } catch (Exception e) {
+            System.out.println("Error loading configuration: " + e.getMessage());
+            return null; // caller decides what to do next
+        }
+    }
+
+    /**
      * Checks whether the input is a quit command.
      * If so, exits the program gracefully.
      */
@@ -125,6 +195,20 @@ public class InputHandler {
             System.out.println("User Quit Simulation!");
             System.exit(0);
         }
+    }
+
+    /**
+     *
+     * @return
+     */
+    private String getSimulatorConfigChoice(){
+        System.out.println("\nChoose input mode:");
+        System.out.println("manual   - Enter parameters manually");
+        System.out.println("load     - Load parameters from a file");
+        System.out.println("quit     - Exit program");
+        System.out.print("Enter choice (manual, load or quit): ");
+        String choice = scanner.nextLine().trim().toLowerCase();
+        return choice;
     }
 
     /**

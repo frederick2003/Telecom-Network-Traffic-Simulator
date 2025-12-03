@@ -15,7 +15,9 @@ public class Main {
                         simulatorConfig.xmOn,
                         simulatorConfig.alphaOff,
                         simulatorConfig.xmOff,
-                        1234L + i));
+                        1234L + i,
+                        simulatorConfig.modelType,
+                        simulatorConfig.hurst));
             }
 
 

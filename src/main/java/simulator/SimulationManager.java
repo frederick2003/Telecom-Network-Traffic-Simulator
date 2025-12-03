@@ -12,6 +12,7 @@ public class SimulationManager {
     private final List<TrafficSource> sources = new ArrayList<>();
     private final TimeSeriesRecorder recorder = new TimeSeriesRecorder();
     private final StatisticsManager statsManager = new StatisticsManager();
+    private final SimpleQueue queue = new SimpleQueue(1000, 5.0);
     private double now = 0.0;
     private double aggregateRate = 0.0;
 
@@ -112,6 +113,13 @@ public class SimulationManager {
             // Updates source state.
             handle(e);
 
+            // Queue Integration
+            queue.addTraffic(aggregateRate);
+            queue.service();
+            statsManager.updateQueueStats(queue.getQueueLength(), queue.getDroppedPackets());
+
+            // Simulation Statistics
+            statsManager.recordAggregateRate(aggregateRate);
             statsManager.updateSimulationStatistics(e, sources.get(e.getSourceId()), aggregateRate);
             recorder.recordEventLog(e.getSourceId(),e.getType(), e.getTime(), aggregateRate);
 
@@ -119,11 +127,19 @@ public class SimulationManager {
         }
 
         statsManager.finaliseStatistics(untilTime);
+        statsManager.computeHurst();
         statsManager.logSummaryStatsToCsv("data/summary-stats.csv");
         // Closes off the final time segment.
         recorder.finish(untilTime);
     }
 
+    /**
+     *
+     * @param currentTime
+     * @param nextStatusUpdate
+     * @param untilTime
+     * @param statusInterval
+     */
     private void logSimulationStatus(double currentTime, double nextStatusUpdate,
                                      double untilTime, double statusInterval){
         if (currentTime >= nextStatusUpdate) {

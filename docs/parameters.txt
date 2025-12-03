@@ -1,0 +1,7 @@
+model=pareto
+totalTime=1000
+numSources=20
+alphaOn=1.5
+xmOn=1
+alphaOff=1.4
+xmOff=1

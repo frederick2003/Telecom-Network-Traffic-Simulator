@@ -12,11 +12,16 @@ public class TrafficSource {
     private final double alphaOn, xmOn; // Pareto parameters for ON duration.
     private final double alphaOff, xmOff; // Pareto parameters for OFF duration.
     private final Random rng; // Random number generator.
+    private final TrafficModelType modelType;
+    private final double hurst;
 
     public TrafficSource(int id, double onRate,
                          double alphaOn, double xmOn,
                          double alphaOff, double xmOff,
-                         long seed) {
+                         long seed,
+                         TrafficModelType modelType,
+                         double hurst
+                         ) {
         this.id = id;
         this.onRate = onRate;
         this.alphaOn = alphaOn;
@@ -25,6 +30,8 @@ public class TrafficSource {
         this.xmOff = xmOff;
         this.rng = new Random(seed);
         this.isOn = false;
+        this.modelType=modelType;
+        this.hurst=hurst;
     }
 
     /**
@@ -34,7 +41,7 @@ public class TrafficSource {
      */
     public Event scheduleInitialEvent(double now) {
         // Start OFF -> schedule first ON
-        double dt = sampleOffDuration(); // Samples a random OFF duration
+        double dt = sampleDuration(false);
         return new Event(now + dt, id, EventType.SOURCE_ON);
     }
 
@@ -48,11 +55,37 @@ public class TrafficSource {
         isOn = !isOn;
 
         // 2. Sample new event duration.
-        double dt = isOn ? sampleOnDuration() : sampleOffDuration();
+        double dt = sampleDuration(isOn);
 
         // Returns a new event.
         return new Event(now + dt,  id, isOn ? EventType.SOURCE_OFF : EventType.SOURCE_ON);
     }
+
+    private double sampleDuration(boolean isOn){
+        switch (modelType){
+            case PARETO -> {
+                return isOn ? sampleOnDuration() : sampleOffDuration();
+            }
+            case FRACTIONAL_GAUSSIAN_NOISE -> {
+                return sampleFGNDuration(isOn);
+            }
+            default -> throw new IllegalStateException("Unknown Model Type" + modelType);
+        }
+    }
+
+    /**
+     *
+     * @param isOn
+     * @return
+     */
+    private double sampleFGNDuration(boolean isOn) {
+        // Placeholder: simple Gaussian-based duration
+        double val = Math.abs(rng.nextGaussian());
+
+        // Scale based on ON/OFF
+        return isOn ? (1 + val * 5) : (1 + val * 2);
+    }
+
 
     /**
      * Gets a random ON duration by Inverse transform sampling the pareto distribution.
