@@ -117,7 +117,4 @@ public class ParetoGeneratorTest {
 
         assertEquals(theoreticalMedian, empiricalMedian, 0.05 * theoreticalMedian);
     }
-
-
-
 }

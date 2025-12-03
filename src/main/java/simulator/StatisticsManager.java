@@ -127,12 +127,10 @@ public class StatisticsManager {
         try (PrintWriter writer = new PrintWriter(new FileWriter(filePath, false))) {
 
             // Write CSV header
-            writer.println("metric,value");
+            writer.println("Total Events,Peak Traffic,Average Traffic");
 
             // Write statistics
-            writer.println("Total Events," + totalEvents);
-            writer.println("Peak Traffic," + peakTraffic);
-            writer.println("Average Traffic," + averageTraffic);
+            writer.println(totalEvents + "," + peakTraffic + "," + averageTraffic);
 
         } catch (IOException e) {
             e.printStackTrace();

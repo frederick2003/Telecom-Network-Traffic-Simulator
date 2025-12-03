@@ -62,7 +62,6 @@ public class SimulationManager {
 
                     // Adds the source rate to the aggregate rate.
                     aggregateRate += s.getOnRate();
-
                 }
             }
             case SOURCE_OFF -> {
@@ -96,6 +95,12 @@ public class SimulationManager {
         seedInitialEvents(); // Puts each sources' first event into the event queue.
         recorder.record(0.0, aggregateRate);
 
+        System.out.println("Simulation started...");
+        System.out.println("Running until time: " + untilTime + "\n");
+
+        double nextStatusUpdate = 0.0;
+        double statusInterval = untilTime / 10.0;
+
         while (!eventQ.isEmpty()) {
             Event e = eventQ.poll(); // Grabs and removes event in the front of the event queue.
             if (e.getTime() > untilTime) break;
@@ -109,12 +114,26 @@ public class SimulationManager {
 
             statsManager.updateSimulationStatistics(e, sources.get(e.getSourceId()), aggregateRate);
             recorder.recordEventLog(e.getSourceId(),e.getType(), e.getTime(), aggregateRate);
+
+            logSimulationStatus(now, nextStatusUpdate, untilTime, statusInterval);
         }
 
         statsManager.finaliseStatistics(untilTime);
         statsManager.logSummaryStatsToCsv("data/summary-stats.csv");
         // Closes off the final time segment.
         recorder.finish(untilTime);
+    }
+
+    private void logSimulationStatus(double currentTime, double nextStatusUpdate,
+                                     double untilTime, double statusInterval){
+        if (currentTime >= nextStatusUpdate) {
+            double percent = (currentTime /untilTime) * 100.0;
+            System.out.printf(
+                    "Status: time = %.2f / %.2f (%.0f%% complete)%n",
+                    currentTime, untilTime, percent
+            );
+            nextStatusUpdate += statusInterval;
+        }
     }
 
     // Getter methods.

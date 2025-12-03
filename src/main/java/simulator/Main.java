@@ -2,35 +2,31 @@ package main.java.simulator;
 
 public class Main {
     public static void main(String[] args) {
-        // Create a simulation manager object.
-        SimulationManager simulator = new SimulationManager();
+        try{
+            SimulationManager simulator = new SimulationManager();
+            InputHandler inputHandler = new InputHandler();
 
-        // Create an InputHandler Object to capture user defined data.
-        InputHandler inputHandler = new InputHandler();
+            SimulatorConfig simulatorConfig = inputHandler.getSimulatorConfiguration();
 
-        // Create a SimulatorConfig object for storing the simulator data inputted by the user.
-        SimulatorConfig simulatorConfig = inputHandler.getSimulatorConfiguration();
+            for (int i = 0; i < simulatorConfig.numberSources; i++){
+                simulator.addSource(new TrafficSource(i,
+                        simulatorConfig.onRate,
+                        simulatorConfig.alphaOn,
+                        simulatorConfig.xmOn,
+                        simulatorConfig.alphaOff,
+                        simulatorConfig.xmOff,
+                        1234L + i));
+            }
 
-        // Add all sources to the simulator manager.
-        for (int i = 0; i < simulatorConfig.numberSources; i++){
-            simulator.addSource(new TrafficSource(i,
-                                            simulatorConfig.onRate,
-                                            simulatorConfig.alphaOn,
-                                            simulatorConfig.xmOn,
-                                            simulatorConfig.alphaOff,
-                                            simulatorConfig.xmOff,
-                                        1234L + i));
 
+            // Run simulator
+            simulator.run(simulatorConfig.totalTime);
+
+            // Outputs time-series Data
+            simulator.getRecorder().logTimeSeriesDataToCsv("data/time-series-data.csv");
+            simulator.getRecorder().logEventsToCsv("data/events-log.csv");
+        } catch(Exception e){
+            System.out.println("Simulation Terminated Unexpectedly: " + e.getMessage());
         }
-
-
-        // Run simulator
-        simulator.run(simulatorConfig.totalTime);
-
-        // Outputs time-series Data
-        simulator.getRecorder().logTimeSeriesDataToCsv("data/time-series-data.csv");
-
-        // Outputs Historical event logs
-        simulator.getRecorder().logEventsToCsv("data/events-log.csv");
     }
 }
