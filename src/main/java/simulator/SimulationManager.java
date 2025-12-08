@@ -27,7 +27,7 @@ import java.util.ArrayList;
  */
 public class SimulationManager {
     /** Priority queue storing all future events, ordered by event time. */
-    private final PriorityQueue<Event> eventQ = new PriorityQueue<>();
+    public final PriorityQueue<Event> eventQ = new PriorityQueue<>();
 
     /**  List of all active traffic sources participating in the simulation. */
     private final List<TrafficSource> sources = new ArrayList<>();
@@ -90,7 +90,7 @@ public class SimulationManager {
      * </ul>
      * @param e The event to process.
      */
-    private void handle(Event e) {
+    protected void handle(Event e) {
         TrafficSource s = (e.getSourceId() >= 0 && e.getSourceId() < sources.size()) ? sources.get(e.getSourceId()) : null;
         if (s == null) return;
 

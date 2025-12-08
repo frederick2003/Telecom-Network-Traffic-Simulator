@@ -151,7 +151,7 @@ public class TimeSeriesRecorder {
     }
 
     /**
-     * Writes the time-series data to a CSV file using {@link Files#writeString(Path, String)}.
+     * Writes the time-series data to a CSV file using {@link writeString(Path, String)}.
      *
      * @param path the file path to write to
      * @throws IOException if writing to the file fails
@@ -163,5 +163,9 @@ public class TimeSeriesRecorder {
             sb.append(p[0]).append(',').append(p[1]).append('\n');
         }
         Files.writeString(path, sb.toString());
+    }
+
+    public int getEventCount() {
+        return 0;
     }
 }
