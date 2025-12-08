@@ -15,5 +15,4 @@ public class SimulationSummary {
     private double totalOffTime;
     private double maxAggregateRate;
     private double minAggregateRate = Double.MAX_VALUE;
-
 }

@@ -3,12 +3,21 @@ package main.java.simulator;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Utility class for estimating the Hurst Parameter H of a time-series using Rescaled Range (R/S) analysis method.
+ * <p>Read more here: <a href="https://en.wikipedia.org/wiki/Hurst_exponent">Hurst Exponent Wikipedia</a></p>
+ *
+ * <p>This implementation computes R/S statistics over multiple window sizes,
+ *  applies a log–log transform, and performs linear regression to estimate the
+ *  slope. This slope corresponds to the Hurst exponent.</p>
+ */
 public class HurstEstimator {
 
     /**
+     * Estimates the Hurst parameter H from a list of time-series samples using the Rescaled Range (R/S) method.
      *
-     * @param data
-     * @return
+     * @param data the time-series values to analyse. Must contain at least 10 samples.
+     * @return the estimated hurst parameter, or 0.5 if insufficient data
      */
     public static double estimateHurst(List<Double> data) {
 
@@ -37,10 +46,12 @@ public class HurstEstimator {
     }
 
     /**
+     * Computes the mean Rescaled Range (R/S) statistic for a given window size.
      *
-     * @param data
-     * @param windowSize
-     * @return
+     *
+     * @param data the full dataset.
+     * @param windowSize the size of each segment for R/S analysis.
+     * @return the average R/S statistic across all complete segments.
      */
     private static double computeRS(List<Double> data, int windowSize) {
         int N = data.size();
@@ -81,10 +92,13 @@ public class HurstEstimator {
     }
 
     /**
+     * Performs a simple linear regression on the input x and y values and returns the slope of the line of best-fit.
      *
-     * @param x
-     * @param y
-     * @return
+     * <p>This regression is used to estimate the Hurst exponent as the slope of the log(R/S) versus log(window size) curve</p>
+     *
+     * @param x the list of log window sizes.
+     * @param y the list of log R/S statistics corresponding to the same indices in {@code x}
+     * @return the slope of the fitted regression line.
      */
     private static double linearRegressionSlope(List<Double> x, List<Double> y) {
         int n = x.size();

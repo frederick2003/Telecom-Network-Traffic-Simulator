@@ -5,40 +5,73 @@ import java.util.List;
 import java.util.ArrayList;
 
 /**
- * The central controller of the event driven telecom traffic simulator.
+ * The central controller of the event-driven telecom traffic simulator.
+ *
+ * <p>This class coordinates all major simulation components, including:
+ * <ul>
+ *     <li>The event queue (priority-driven)</li>
+ *     <li>All {@link TrafficSource} objects</li>
+ *     <li>Statistics collection via {@link StatisticsManager}</li>
+ *     <li>Queueing behaviour via {@link SimpleQueue}</li>
+ *     <li>Time-series recording via {@link TimeSeriesRecorder}</li>
+ * </ul>
+ *
+ * <p>Its responsibilities include:
+ * <ul>
+ *     <li>Scheduling and executing events in chronological order</li>
+ *     <li>Maintaining the global simulation clock</li>
+ *     <li>Updating aggregate traffic rate as sources toggle ON/OFF</li>
+ *     <li>Feeding traffic into a buffer queue and measuring congestion</li>
+ *     <li>Recording simulation output for later inspection or CSV export</li>
+ * </ul>
  */
 public class SimulationManager {
+    /** Priority queue storing all future events, ordered by event time. */
     private final PriorityQueue<Event> eventQ = new PriorityQueue<>();
+
+    /**  List of all active traffic sources participating in the simulation. */
     private final List<TrafficSource> sources = new ArrayList<>();
+
+    /** Records piecewise-constant traffic rate segments and event logs. */
     private final TimeSeriesRecorder recorder = new TimeSeriesRecorder();
+
+    /**  Collects and computes statistics on aggregate traffic, queueing, and events. */
     private final StatisticsManager statsManager = new StatisticsManager();
+
+    /** Simple FIFO queue modelling network congestion behaviour.  */
     private final SimpleQueue queue = new SimpleQueue(1000, 5.0);
+
+    /** The current simulation time (updated as events execute). */
     private double now = 0.0;
+
+    /** Current aggregate traffic rate (sum of ON source rates). */
     private double aggregateRate = 0.0;
 
     /**
-     * Adds a new Traffic source (ON,OFF generator) to the simulator so it can participate in the event-driven process.
-     * @param s Traffic source to add to the ArrayList.
+     * Adds a new {@link TrafficSource} to the simulation.
+     * Each {@link TrafficSource} object generates ON/OFF events during the event-friven loop.
+     * @param source Traffic source to add.
      */
-    public void addSource(TrafficSource s) {
-        sources.add(s);
+    public void addSource(TrafficSource source) {
+        sources.add(source);
     }
 
     /**
-     * Adds an event to the event queue, (PriorityQueue sorted by event time).
-     * This queue determines the order in which events are processed in the simulation.
-     * @param e event to add to the PriorityQueue.
+     * Schedules a new event by inserting it into the priority queue.
+     * Events are always processed in chronological order.
+     * @param event The event to schedule.
      */
-    public void schedule(Event e) {
-        eventQ.add(e);
+    public void schedule(Event event) {
+        eventQ.add(event);
     }
 
     /**
-     * Schedules the first event for every traffic source at the start of the simulation.
+     * Schedules the first event for every traffic source.
      *
-     * For each TrafficSource in sources, it calls that source's scheduleInitialEvent method(now) method.
-     * Each source starts in an OFF state, the scheduleInitialEvent(now) method samples a random time from a pareto distribution.
-     * Each event is then added to the event queue via the schedule method.
+     * <p>Each source starts in the OFF state. Calling
+     * {@link TrafficSource#scheduleInitialEvent(double)} samples the first OFF duration
+     * and returns the corresponding event. These initial events are placed into
+     * the event queue before the simulation loop begins.
      */
     public void seedInitialEvents() {
         for (TrafficSource s : sources) {
@@ -47,8 +80,15 @@ public class SimulationManager {
     }
 
     /**
-     * Manages event execution, namely toggles ON, OFF sources and adjusts aggregateRate.
-     * @param e current event object.
+     * Manages the logic of a single event execution.
+     *
+     * <p>This includes:</p>
+     * <ul>
+     *     <li>Toggling the state of a {@link TrafficSource}</li>
+     *     <li>Updating the aggregate traffic rate</li>
+     *     <li>Scheduling the next ON or OFF event</li>
+     * </ul>
+     * @param e The event to process.
      */
     private void handle(Event e) {
         TrafficSource s = (e.getSourceId() >= 0 && e.getSourceId() < sources.size()) ? sources.get(e.getSourceId()) : null;
@@ -76,9 +116,6 @@ public class SimulationManager {
                     aggregateRate -= s.getOnRate();
                 }
             }
-            case TICK -> {
-                // Optional: for periodic reporting
-            }
             default -> {
                 System.out.print("Default triggered");
             }
@@ -86,10 +123,20 @@ public class SimulationManager {
     }
 
     /**
-     * Runs main simulation loop, processes events until user defined total time is reached.
-     * Core method that progresses the simulation.
+     * Executes the main simulation loop until the specified time limit is reached.
      *
-     * @param untilTime user defined total simulation time.
+     * <p>The loop repeatedly:
+     * <ol>
+     *     <li>Extracts the next event from the priority queue</li>
+     *     <li>Advances the simulation time</li>
+     *     <li>Updates state and traffic based on the event</li>
+     *     <li>Feeds aggregate traffic into the {@link SimpleQueue}</li>
+     *     <li>Records time-series data and statistics</li>
+     * </ol>
+     *
+     * <p>Once the simulation ends, statistics are finalised and summary reports are written.</p>
+     *
+     * @param untilTime The maximum simulation time before stopping.
      */
     public void run(double untilTime) {
 
@@ -134,11 +181,12 @@ public class SimulationManager {
     }
 
     /**
+     * Periodically logs simulation progress to console.
      *
-     * @param currentTime
-     * @param nextStatusUpdate
-     * @param untilTime
-     * @param statusInterval
+     * @param currentTime The current simulation time.
+     * @param nextStatusUpdate The time at which the next progress update should occur
+     * @param untilTime The total simulation time.
+     * @param statusInterval The interval between progress updates.
      */
     private void logSimulationStatus(double currentTime, double nextStatusUpdate,
                                      double untilTime, double statusInterval){
@@ -152,8 +200,18 @@ public class SimulationManager {
         }
     }
 
-    // Getter methods.
+    /**
+     * @return the internal {@link TimeSeriesRecorder} used during simulation
+     */
     public TimeSeriesRecorder getRecorder() { return recorder; }
+
+    /**
+     * @return the current simulation time (in time units)
+     */
     public double getNow() { return now; }
+
+    /**
+     * @return the current aggregate traffic rate across all ON sources
+     */
     public double getAggregateRate() { return aggregateRate; }
 }

@@ -5,21 +5,26 @@ import java.util.Scanner;
 /**
  * Handles all console-based input for the Telecom Network Traffic Simulator.
  *
- * This class is responsible for prompting the user for simulation parameters,
- * validating the input, and constructing a {@link SimulatorConfig} object.
- *
- * This class deals makes sure all input is in a valid format and deals with error handling.
+ * <p>This class is responsible for:
+ * <Ul>
+ *     <li>Prompting the user for all simulation parameters.</li>
+ *     <li>Validating numeric and text input.</li>
+ *     <li>Supporting two configuration modes: manual input or loading from file</li>
+ *     <li>Constructing and returning a fully populated and validated {@code SimulatorConfig} object</li>
+ *     <li>Provide error handling and a universal quit/q command</li>
+ * </Ul>
+ * </p>
  */
 public class InputHandler {
-    /** Scanner instance for reading console input. */
     private final Scanner scanner = new Scanner(System.in);
+    // Default Hurst parameter
     private double hurst = 0.8;
 
     /**
      * Prompts the user for all required simulator parameters, validates the input,
-     * and constructs a fully populated SimulatorConfig.
+     * and constructs a fully populated {@code SimulatorConfig} object.
      *
-     * @return a SimulatorConfig object containing all simulation parameters.
+     * @return A fully constructed {@code SimulatorConfig} object.
      */
     public SimulatorConfig getSimulatorConfiguration() {
         logWelcome();
@@ -52,6 +57,10 @@ public class InputHandler {
         }
     }
 
+     /**
+     * Prompts the user for all parameters needed for manual configuration mode, validates them, and constructs a {@code SimulatorConfig} object.
+     * @return A {@code SimulatorConfig} object populated with user-entered values
+     */
     private SimulatorConfig getManualSimulationConfig(){
 
         int choice = getPositiveInt("\nChoose Traffic Model:\n" +
@@ -111,13 +120,33 @@ public class InputHandler {
     }
 
     /**
+     * Loads simulation parameters from a configuration file.
+     * <p>The filepath is entered by the user, and the file is passed to {@link SimulatorConfigLoader#loadFromFile(String)}.</p>
+     *
+     * @return A populated SimulatorConfig if loaded successful, or {@code null} otherwise.
+     */
+    public SimulatorConfig loadConfigFromFile(){
+        System.out.print("Enter configuration file name: ");
+        String filepath = scanner.next();
+
+        try {
+            SimulatorConfig config = SimulatorConfigLoader.loadFromFile(filepath);
+            System.out.println("Configuration loaded successfully from " + filepath);
+            return config;
+        } catch (Exception e) {
+            System.out.println("Error loading configuration: " + e.getMessage());
+            return null; // caller decides what to do next
+        }
+    }
+
+    /**
      * Prompts the user for a strictly positive double value.
      *
      * This method ensures: Input is not empty, input is a valid numeric type and
      * value is strictly greater than zero.
      *
-     * @param prompt: the message to display when requesting input
-     * @return a valid, positive double value entered by the user
+     * @param prompt The message to display when requesting input
+     * @return A valid, positive double value entered by the user
      */
     private double getPositiveDouble(String prompt) {
         while (true) {
@@ -147,11 +176,11 @@ public class InputHandler {
     /**
      * Prompts the user for a strictly positive integer.
      *
-     * This method uses getPositiveDouble(String) to parse input,
+     * This method uses {@link #getPositiveDouble(String)} to parse input,
      * then enforces integer-only behaviour by checking that the input has
      * no fractional component.
      *
-     * @param prompt  the message to display when requesting input
+     * @param prompt the message to display when requesting input
      * @return a valid positive integer entered by the user
      */
     private int getPositiveInt(String prompt) {
@@ -169,26 +198,9 @@ public class InputHandler {
     }
 
     /**
-     *
-     * @return
-     */
-    public SimulatorConfig loadConfigFromFile(){
-        System.out.print("Enter configuration file name: ");
-        String filepath = scanner.next();
-
-        try {
-            SimulatorConfig config = SimulatorConfigLoader.loadFromFile(filepath);
-            System.out.println("Configuration loaded successfully from " + filepath);
-            return config;
-        } catch (Exception e) {
-            System.out.println("Error loading configuration: " + e.getMessage());
-            return null; // caller decides what to do next
-        }
-    }
-
-    /**
-     * Checks whether the input is a quit command.
-     * If so, exits the program gracefully.
+     * Checks whether the user has entered a quit command.
+     * If so, the program terminates successfully.
+     * @param input User input text.
      */
     private void checkQuit(String input) {
         if (input.equalsIgnoreCase("q") || input.equalsIgnoreCase("quit")) {
@@ -198,8 +210,13 @@ public class InputHandler {
     }
 
     /**
-     *
-     * @return
+     * Prompts the user to choose the configuration mode:
+     * <ul>
+     *     <li>"manual" - manually enter parameters</li>
+     *     <li>"load" - load parameters from a file</li>
+     *     <li>"quit" - exit the program<</li>
+     * </ul>
+     * @return The user's choice as a lowercase text string.
      */
     private String getSimulatorConfigChoice(){
         System.out.println("\nChoose input mode:");
@@ -214,6 +231,7 @@ public class InputHandler {
     /**
      * Displays a welcome message for the simulator.
      * Called automatically when configuration begins.
+     * <p>Provides guidance on available commands and expected behaviour.</p>
      */
     private void logWelcome() {
         System.out.println("--- Telecom Network Traffic Simulator ---");

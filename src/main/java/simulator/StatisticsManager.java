@@ -7,20 +7,32 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Collects simple summary statistics over the course of a simulation:
+ * Manages the collection, updating, and final reporting of summary statistics
+ * throughout the telecom traffic simulation.
  *
- *  - totalEvents:    total number of events processed
- *  - peakTraffic:    maximum aggregate traffic observed
- *  - averageTraffic: time-weighted average aggregate traffic
+ * <p>This class tracks metrics such as:
+ * <ul>
+ *     <li><b>Total events</b> processed</li>
+ *     <li><b>Peak aggregate traffic</b> observed</li>
+ *     <li><b>Time-weighted average traffic</b></li>
+ *     <li><b>Hurst parameter</b> estimation based on aggregate rate samples</li>
+ *     <li><b>Network queue behaviour</b> (maximum length and dropped packets)</li>
+ * </ul>
  *
- * The average traffic is computed using a time-weighted approach:
- * for each interval between two events, we accumulate
+ * <p>The time-weighted average is computed by integrating the traffic rate
+ * between successive events:
  *
- *      trafficArea += aggregateRate * duration
+ * <pre>
+ *     trafficArea += aggregateRate * duration
+ * </pre>
  *
- * and at the end of the simulation:
+ * and finalised at simulation end using:
  *
- *      averageTraffic = trafficArea / totalSimulationTime
+ * <pre>
+ *     averageTraffic = trafficArea / totalSimulationTime
+ * </pre>
+ *
+ * <p>The class also supports exporting summary statistics to a CSV file.</p>
  */
 public class StatisticsManager {
 
@@ -41,7 +53,9 @@ public class StatisticsManager {
     private double maxQueueLength = 0.0;
     private double totalDroppedPackets = 0.0;
 
-
+    /**
+     * Creates and initialises a new StatisticsManager with zeroed metrics.
+     */
     public StatisticsManager() {
         this.totalEvents = 0;
         this.peakTraffic = 0.0;
@@ -54,12 +68,19 @@ public class StatisticsManager {
     }
 
     /**
-     * Called by the simulation loop whenever an event is processed.
+     * Updates all relevant statistics for a newly processed event.
+     *
+     * <p>This includes:
+     * <ul>
+     *     <li>Advancing the time-weighted traffic integral</li>
+     *     <li>Updating peak traffic</li>
+     *     <li>Incrementing event count</li>
+     * </ul>
      *
      * @param event                the event being processed
-     * @param currentSource        the source associated with the event (if needed)
-     * @param currentAggregateRate the aggregate traffic rate immediately
-     *                             after this event has been applied
+     * @param currentSource        the traffic source that triggered the event
+     * @param currentAggregateRate the aggregate traffic rate immediately after
+     *                             processing the event
      */
     public void updateSimulationStatistics(Event event,
                                            TrafficSource currentSource,
@@ -84,10 +105,11 @@ public class StatisticsManager {
     }
 
     /**
-     * Call this once at the end of the simulation, after the last event has been
-     * processed. This method finalises the time-weighted average traffic.
+     * Finalises all statistics after the simulation ends.
+     * This computes the final weighted average traffic based on
+     * the remaining interval from the last event to the simulation end.
      *
-     * @param simulationEndTime the final simulation time (e.g. totalTime)
+     * @param simulationEndTime the final time of the simulation run
      */
     public void finaliseStatistics(double simulationEndTime) {
         // Capture the final interval from the last event to the end of the simulation
@@ -105,25 +127,51 @@ public class StatisticsManager {
         }
     }
 
+    /** Increments the total event counter. */
     private void updateTotalEvents() {
         this.totalEvents += 1;
     }
 
+
+    /**
+     * Updates the peak aggregate traffic measurement.
+     *
+     * @param currentAggregateRate the newly calculated aggregate rate
+     */
     private void updatePeakTraffic(double currentAggregateRate) {
         if (currentAggregateRate > this.peakTraffic) {
             this.peakTraffic = currentAggregateRate;
         }
     }
 
+    /**
+     * Records a single aggregate traffic rate sample for later Hurst analysis.
+     *
+     * @param rate the aggregate traffic at a given time
+     */
     public void recordAggregateRate(double rate){
         timeSeriesRates.add(rate);
     }
 
+    /**
+     * Computes the Hurst parameter using {@link HurstEstimator#estimateHurst(List)}.
+     * Prints the estimated value to the console.
+     */
     public void computeHurst(){
         hurstParameter = HurstEstimator.estimateHurst(timeSeriesRates);
         System.out.println("Hurst Parameter:" + hurstParameter);
     }
 
+    /**
+     * Updates statistics related to the network queue, including:
+     * <ul>
+     *     <li>Maximum queue length</li>
+     *     <li>Total dropped packets</li>
+     * </ul>
+     *
+     * @param queueLength    the current queue size
+     * @param droppedPackets cumulative packets dropped so far
+     */
     public void updateQueueStats(double queueLength, double droppedPackets) {
         if (queueLength > maxQueueLength) {
             maxQueueLength = queueLength;
@@ -131,6 +179,21 @@ public class StatisticsManager {
         totalDroppedPackets = droppedPackets;
     }
 
+    /**
+     * Writes a CSV file containing summary statistics from the simulation.
+     *
+     * <p>CSV Columns:
+     * <pre>
+     * Total Events,
+     * Peak Traffic,
+     * Average Traffic,
+     * Hurst Parameter,
+     * Max Queue Length,
+     * Dropped Packets
+     * </pre>
+     *
+     * @param filePath the output path for the CSV file
+     */
     public void logSummaryStatsToCsv(String filePath) {
         try (PrintWriter writer = new PrintWriter(new FileWriter(filePath, false))) {
 
