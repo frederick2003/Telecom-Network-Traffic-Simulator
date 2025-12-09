@@ -1,6 +1,5 @@
-package test.java.simulator;
+package simulator;
 
-import main.java.simulator.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
