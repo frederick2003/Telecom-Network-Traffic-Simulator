@@ -1,4 +1,4 @@
-package main.java.simulator;
+package simulator;
 
 public class Main {
     public static void main(String[] args) {

@@ -1,4 +1,4 @@
-package main.java.simulator;
+package simulator;
 
 public enum TrafficModelType {
     PARETO,

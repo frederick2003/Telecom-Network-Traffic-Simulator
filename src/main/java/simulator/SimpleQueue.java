@@ -1,4 +1,4 @@
-package main.java.simulator;
+package simulator;
 
 /**
  * A basic FIFO queue representing a simple network buffer.

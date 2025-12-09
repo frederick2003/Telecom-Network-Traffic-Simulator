@@ -1,4 +1,4 @@
-package test.java.simulator;
+package simulator;
 
 public class EventQueueTest {
 }

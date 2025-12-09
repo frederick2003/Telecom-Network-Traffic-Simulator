@@ -1,4 +1,4 @@
-package main.java.simulator;
+package simulator;
 
 /**
  * Collects and computes summary statistics for a simulation run.

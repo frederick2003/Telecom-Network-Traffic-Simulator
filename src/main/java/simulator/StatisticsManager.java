@@ -1,4 +1,4 @@
-package main.java.simulator;
+package simulator;
 
 import java.io.FileWriter;
 import java.io.IOException;

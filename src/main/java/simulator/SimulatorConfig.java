@@ -1,4 +1,4 @@
-package main.java.simulator;
+package simulator;
 
 public class SimulatorConfig {
     public final double totalTime, alphaOn, alphaOff, xmOn, xmOff, onRate;

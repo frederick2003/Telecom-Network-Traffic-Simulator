@@ -1,4 +1,4 @@
-package main.java.simulator;
+package simulator;
 
 /**
  * An enum type representing the state of a source ON or OFF

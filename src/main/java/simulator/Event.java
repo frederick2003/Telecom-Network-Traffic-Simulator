@@ -1,4 +1,4 @@
-package main.java.simulator;
+package simulator;
 
 /**
  * A timestamped instruction telling the simulator what action to run and when.

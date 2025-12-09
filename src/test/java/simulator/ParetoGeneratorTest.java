@@ -1,6 +1,5 @@
-package test.java.simulator;
+package simulator;
 
-import main.java.simulator.ParetoSampler;
 import java.util.Random;
 import java.util.Arrays;
 
