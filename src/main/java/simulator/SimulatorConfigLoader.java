@@ -31,7 +31,7 @@ public class SimulatorConfigLoader {
             String line;
 
             while ((line = br.readLine()) != null) {
-                if (line.trim().isEmpty() || !line.contains("=")) continue;
+                if (line.trim().isEmpty() || !line.contains("=")) {continue;}
 
                 String[] parts = line.split("=");
                 if (parts.length != 2) continue;

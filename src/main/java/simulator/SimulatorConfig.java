@@ -1,10 +1,10 @@
 package simulator;
 
 public class SimulatorConfig {
-    public final double totalTime, alphaOn, alphaOff, xmOn, xmOff, onRate;
-    public final int numberSources;
-    public final TrafficModelType modelType;
-    public final double hurst;
+    private final double totalTime, alphaOn, alphaOff, xmOn, xmOff, onRate;
+    private final int numberSources;
+    private final TrafficModelType modelType;
+    private final double hurst;
 
 
     public SimulatorConfig(double totalTime,
@@ -26,5 +26,41 @@ public class SimulatorConfig {
         this.onRate = onRate;
         this.modelType = modelType;
         this.hurst=hurst;
+    }
+
+    public double getAlphaOn() {
+        return alphaOn;
+    }
+
+    public double getAlphaOff() {
+        return alphaOff;
+    }
+
+    public double getXmOn() {
+        return xmOn;
+    }
+
+    public double getXmOff() {
+        return xmOff;
+    }
+
+    public double getTotalTime(){
+        return totalTime;
+    }
+
+    public double getOnRate() {
+        return onRate;
+    }
+
+    public int getNumberSources() {
+        return numberSources;
+    }
+
+    public TrafficModelType getModelType(){
+        return modelType;
+    }
+
+    public double getHurst(){
+        return hurst;
     }
 }

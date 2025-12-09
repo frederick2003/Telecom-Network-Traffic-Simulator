@@ -116,9 +116,6 @@ public class SimulationManager {
                     aggregateRate -= s.getOnRate();
                 }
             }
-            default -> {
-                System.out.print("Default triggered");
-            }
         }
     }
 
@@ -214,4 +211,11 @@ public class SimulationManager {
      * @return the current aggregate traffic rate across all ON sources
      */
     public double getAggregateRate() { return aggregateRate; }
+
+    /**
+     * @return The number of sources in the event driven queue.
+     */
+    public int getSourceNumber(){
+        return sources.size();
+    }
 }

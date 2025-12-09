@@ -16,7 +16,7 @@ import java.util.Scanner;
  * </p>
  */
 public class InputHandler {
-    private final Scanner scanner = new Scanner(System.in);
+    private final Scanner scanner;
     // Default Hurst parameter
     private double hurst = 0.8;
 
@@ -57,16 +57,25 @@ public class InputHandler {
         }
     }
 
+    public InputHandler(Scanner scanner){
+        this.scanner = scanner;
+    }
+
+    public InputHandler(){
+        this.scanner = new Scanner(System.in);
+    }
+
      /**
      * Prompts the user for all parameters needed for manual configuration mode, validates them, and constructs a {@code SimulatorConfig} object.
      * @return A {@code SimulatorConfig} object populated with user-entered values
      */
-    private SimulatorConfig getManualSimulationConfig(){
+    public SimulatorConfig getManualSimulationConfig(){
 
-        int choice = getPositiveInt("\nChoose Traffic Model:\n" +
-                "1 = Pareto (recommended)\n" +
-                "2 = Fractional Gaussian Noise\n" +
-                ":");
+        int choice = getPositiveInt("""
+                Choose Traffic Model:
+                1 = Pareto (recommended)
+                2 = Fractional Gaussian Noise
+                :""");
 
         TrafficModelType modelType = switch (choice){
             case 1 -> TrafficModelType.PARETO;
@@ -148,7 +157,7 @@ public class InputHandler {
      * @param prompt The message to display when requesting input
      * @return A valid, positive double value entered by the user
      */
-    private double getPositiveDouble(String prompt) {
+    public double getPositiveDouble(String prompt) {
         while (true) {
             System.out.print(prompt);
             String input = scanner.nextLine().trim();
@@ -183,7 +192,7 @@ public class InputHandler {
      * @param prompt the message to display when requesting input
      * @return a valid positive integer entered by the user
      */
-    private int getPositiveInt(String prompt) {
+    public int getPositiveInt(String prompt) {
         while (true) {
             double val = getPositiveDouble(prompt);
 
@@ -202,10 +211,10 @@ public class InputHandler {
      * If so, the program terminates successfully.
      * @param input User input text.
      */
-    private void checkQuit(String input) {
+    public void checkQuit(String input) {
         if (input.equalsIgnoreCase("q") || input.equalsIgnoreCase("quit")) {
             System.out.println("User Quit Simulation!");
-            System.exit(0);
+            throw new QuitException();
         }
     }
 
@@ -218,14 +227,13 @@ public class InputHandler {
      * </ul>
      * @return The user's choice as a lowercase text string.
      */
-    private String getSimulatorConfigChoice(){
+    public String getSimulatorConfigChoice(){
         System.out.println("\nChoose input mode:");
         System.out.println("manual   - Enter parameters manually");
         System.out.println("load     - Load parameters from a file");
         System.out.println("quit     - Exit program");
         System.out.print("Enter choice (manual, load or quit): ");
-        String choice = scanner.nextLine().trim().toLowerCase();
-        return choice;
+        return scanner.nextLine().trim().toLowerCase();
     }
 
     /**

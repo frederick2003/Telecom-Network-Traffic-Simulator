@@ -166,6 +166,6 @@ public class TimeSeriesRecorder {
     }
 
     public int getEventCount() {
-        return 0;
+        return eventsLog.size();
     }
 }

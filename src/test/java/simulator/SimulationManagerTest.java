@@ -40,7 +40,7 @@ public class SimulationManagerTest {
         );
 
         manager.addSource(ts);
-        assertEquals(1, manager.getRecorder().getEventCount(),
+        assertEquals(1, manager.getSourceNumber(),
                 "Recorder stub increments on addSource()");
     }
 

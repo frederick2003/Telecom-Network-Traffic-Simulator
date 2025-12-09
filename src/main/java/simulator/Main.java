@@ -8,21 +8,21 @@ public class Main {
 
             SimulatorConfig simulatorConfig = inputHandler.getSimulatorConfiguration();
 
-            for (int i = 0; i < simulatorConfig.numberSources; i++){
+            for (int i = 0; i < simulatorConfig.getNumberSources(); i++){
                 simulator.addSource(new TrafficSource(i,
-                        simulatorConfig.onRate,
-                        simulatorConfig.alphaOn,
-                        simulatorConfig.xmOn,
-                        simulatorConfig.alphaOff,
-                        simulatorConfig.xmOff,
+                        simulatorConfig.getOnRate(),
+                        simulatorConfig.getAlphaOn(),
+                        simulatorConfig.getXmOn(),
+                        simulatorConfig.getAlphaOff(),
+                        simulatorConfig.getXmOff(),
                         1234L + i,
-                        simulatorConfig.modelType,
-                        simulatorConfig.hurst));
+                        simulatorConfig.getModelType(),
+                        simulatorConfig.getHurst()));
             }
 
 
             // Run simulator
-            simulator.run(simulatorConfig.totalTime);
+            simulator.run(simulatorConfig.getTotalTime());
 
             // Outputs time-series Data
             simulator.getRecorder().logTimeSeriesDataToCsv("data/time-series-data.csv");
