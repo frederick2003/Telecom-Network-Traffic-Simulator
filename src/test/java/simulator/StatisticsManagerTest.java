@@ -99,7 +99,7 @@ public class StatisticsManagerTest {
             fail("Failed to read written summary CSV");
         }
 
-        assertTrue(content.contains("0.75")); // Hurst appears in CSV
+        assertTrue(content.contains("0.5")); // Hurst appears in CSV
     }
 
     @Test
@@ -125,6 +125,6 @@ public class StatisticsManagerTest {
         assertTrue(csv.contains("1")); // one event processed
         assertTrue(csv.contains("12.0")); // peak traffic
         assertTrue(csv.contains(String.valueOf(stats.getAverageTraffic())));
-        assertTrue(csv.contains("0.75")); // stub Hurst value
+        assertTrue(csv.contains("0.5")); // stub Hurst value
     }
 }

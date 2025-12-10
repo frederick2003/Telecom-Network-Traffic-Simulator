@@ -2,7 +2,7 @@ package simulator;
 
 public class FFTUtil {
 
-    // Real FFT using Cooley-Tukey (simple and fast enough for N=2048)
+
     public static double[] realFFT(double[] x) {
         int n = x.length;
         double[] real = new double[n];
@@ -35,10 +35,6 @@ public class FFTUtil {
         ifft(real, imag);
         return real;
     }
-
-    // --------------------------
-    // Standard Cooley–Tukey FFT
-    // --------------------------
 
     private static void fft(double[] real, double[] imag) {
         int n = real.length;
