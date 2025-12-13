@@ -77,10 +77,13 @@ public class InputHandler {
                 2 = Fractional Gaussian Noise
                 :""");
 
-        TrafficModelType modelType = switch (choice){
+        TrafficModelType modelType = switch (choice) {
             case 1 -> TrafficModelType.PARETO;
             case 2 -> TrafficModelType.FRACTIONAL_GAUSSIAN_NOISE;
-            default -> TrafficModelType.PARETO;
+            default -> {
+                System.out.println("Unknown choice Defaulting to PARETO.");
+                yield TrafficModelType.PARETO;
+            }
         };
 
         if (modelType == TrafficModelType.FRACTIONAL_GAUSSIAN_NOISE){

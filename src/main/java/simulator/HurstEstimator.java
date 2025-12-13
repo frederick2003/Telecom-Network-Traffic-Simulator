@@ -87,7 +87,6 @@ public class HurstEstimator {
                 totalRS += (R / S);
             }
         }
-
         return totalRS / numSegments;
     }
 

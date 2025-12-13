@@ -28,7 +28,7 @@ public class Main {
             simulator.getRecorder().logTimeSeriesDataToCsv("data/time-series-data.csv");
             simulator.getRecorder().logEventsToCsv("data/events-log.csv");
         } catch(Exception e){
-            System.out.println("Simulation Terminated Unexpectedly: " + e.getMessage());
+            System.out.println("Exiting Simulator");
         }
     }
 }

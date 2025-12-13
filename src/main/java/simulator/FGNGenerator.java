@@ -25,12 +25,8 @@ public class FGNGenerator {
         return value;
     }
 
+    // Hosking-style FGN Generator (no FFT required)
     // ------------------------
-    // Davies-Harte Algorithm
-    // ------------------------
-    // ------------------------
-// Hosking-style FGN Generator (no FFT required)
-// ------------------------
     private double[] generateFGN(int n, double H) {
 
         double[] x = new double[n];       // output FGN samples
@@ -54,8 +50,8 @@ public class FGNGenerator {
         }
 
         // 2. Hosking / Durbin–Levinson recursion
-        double[] phiPrev = new double[n]; // φ_{k-1}(j)
-        double[] phiCurr = new double[n]; // φ_{k}(j)
+        double[] phiPrev = new double[n];
+        double[] phiCurr = new double[n];
 
         // initial variance
         double v = gamma[0];
@@ -102,6 +98,4 @@ public class FGNGenerator {
 
         return x;
     }
-
-
 }
